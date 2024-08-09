@@ -1,0 +1,74 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXFileReference section */
+		AD4753D72C64803B00D8982C /* Contents */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Contents; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		AD4753D02C64800E00D8982C = {
+			isa = PBXGroup;
+			children = (
+				AD4753D72C64803B00D8982C /* Contents */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		AD4753D12C64800E00D8982C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1420;
+			};
+			buildConfigurationList = AD4753D42C64800E00D8982C /* Build configuration list for PBXProject "GlyphsGPT" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AD4753D02C64800E00D8982C;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		AD4753D52C64800E00D8982C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		AD4753D62C64800E00D8982C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AD4753D42C64800E00D8982C /* Build configuration list for PBXProject "GlyphsGPT" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD4753D52C64800E00D8982C /* Debug */,
+				AD4753D62C64800E00D8982C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AD4753D12C64800E00D8982C /* Project object */;
+}
