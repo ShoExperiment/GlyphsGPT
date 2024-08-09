@@ -1,5 +1,6 @@
 
 # GlyphsGPT
+<img width="787" alt="image" src="https://github.com/user-attachments/assets/3f654a8c-36ef-48ca-9608-08c044d7e9b2">
 
 GlyphsGPT is a plugin for the Glyphs App that integrates OpenAI's GPT and Anthropic's Claude AI to assist with Python scripting within the app. This tool allows users to leverage powerful language models to generate code snippets, automate tasks, and enhance their workflow in Glyphs.
 
@@ -13,6 +14,7 @@ GlyphsGPT is a plugin for the Glyphs App that integrates OpenAI's GPT and Anthro
 
 - **Glyphs App**: Version 3.0 or later.
 - **Python Version**: The plugin has been tested with Python 3.10.12 installed via Homebrew.
+- **API keys**: ChatGPT and/or Claude
 - **Required Libraries**:
   - `openai`
   - `anthropic`
@@ -24,6 +26,9 @@ GlyphsGPT is a plugin for the Glyphs App that integrates OpenAI's GPT and Anthro
 The Python runtime that comes with the Glyphs App **DOES NOT WORK** for this plugin.
 
 You must install Python via Homebrew. After installation, you need to configure Glyphs to use the correct Python version. Go to Settings > Addons > Python versions and select the correct one.
+
+<img width="735" alt="image" src="https://github.com/user-attachments/assets/bc8bdf21-452d-4b6a-b972-dc65cdde3130">
+
 
 You will also need to know the path to the Python installation. This path will be used to install the required libraries and must be hard-coded into this plugin.
 
@@ -60,8 +65,13 @@ The API keys for Claude AI and ChatGPT need to be hard-coded within the plugin. 
 ### 4. Usage
 
 - **Write Your Request**: In the Macro panel editor, write your request for what you need assistance with.
+<img width="446" alt="image" src="https://github.com/user-attachments/assets/48f49d3e-44f4-464e-a4cf-c675a9b778f1">
+
 - **Press the Run Button**: After writing your request, press the "Run" button in the plugin.
+<img width="142" alt="image" src="https://github.com/user-attachments/assets/144372f0-3605-4807-94fe-c495396b0a82">
+
 - **View the Response**: The AI-generated response will be displayed in the Macro panel editor.
+<img width="569" alt="image" src="https://github.com/user-attachments/assets/ba48f125-86c5-43d2-a867-42dfe598e514">
 
 ### 5. Notes
 
