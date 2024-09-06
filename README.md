@@ -3,7 +3,6 @@
 <img width="787" alt="image" src="https://github.com/user-attachments/assets/3f654a8c-36ef-48ca-9608-08c044d7e9b2">
 
 
-https://github.com/user-attachments/assets/82baf38b-f2e6-43af-af32-e8c4251520e0
 
 
 GlyphsGPT is a plugin for the Glyphs App that integrates OpenAI's GPT and Anthropic's Claude AI to assist with Python scripting within the app. This tool allows users to leverage powerful language models to generate code snippets, automate tasks, and enhance their workflow in Glyphs.
