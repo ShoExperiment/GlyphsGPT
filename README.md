@@ -1,6 +1,6 @@
 
 # GlyphsGPT
-<img width="787" alt="image" src="https://github.com/user-attachments/assets/3f654a8c-36ef-48ca-9608-08c044d7e9b2">
+<img width="856" alt="image" src="https://github.com/user-attachments/assets/7e61ceb9-9220-4c0b-8fa6-6afabb82a5a2" />
 
 
 
@@ -8,10 +8,17 @@
 GlyphsGPT is a plugin for the Glyphs App that integrates OpenAI's GPT and Anthropic's Claude AI to assist with Python scripting within the app. This tool allows users to leverage powerful language models to generate code snippets, automate tasks, and enhance their workflow in Glyphs.
 
 ## Features
-
+- **Turn on/off Pre-defined prompt** to ask non-Glyphs-related tasks.
+- **Autopilot** to excute code directly.
 - **Generate Python scripts** within the Glyphs App using AI-powered assistants.
 - **Supports both OpenAI's GPT** and **Anthropic's Claude AI**.
 - **Customizable and extendable** to fit various workflows within the Glyphs environment.
+
+**Autopilot**
+
+A feature that automatically executes any Python code returned by ChatGPT or Claude.
+It scans the AI’s response for code blocks (e.g., enclosed in triple backticks) and runs them immediately in the Glyphs Macro Panel environment.
+
 
 ## Requirements
 
@@ -78,7 +85,7 @@ The API keys for Claude AI and ChatGPT need to be hard-coded within the plugin. 
 
 ### 5. Notes
 
-- **AI Models**: The AI models used (ChatGPT 3.5 and Claude 3.5 sonnet) are hard-coded in the plugin. If you want to use a different model, you will need to modify the plugin code. For example:
+- **AI Models**: The AI models used (ChatGPT 3.5 and Claude 3.7) are hard-coded in the plugin. If you want to use a different model, you will need to modify the plugin code. For example:
 
 ```python
 model="claude-3-5-sonnet-20240620"
