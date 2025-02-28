@@ -9,13 +9,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.Shotaro Nakano.GlyphsGPT</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>1.0</string>
+	<string>2.0</string>
 	<key>CFBundleName</key>
 	<string>GlyphsGPT</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>2.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>UpdateFeedURL</key>
 	<string>____OnlineUrlToThisPlist____</string>
 	<key>productPageURL</key>
@@ -23,7 +23,7 @@
 	<key>productReleaseNotes</key>
 	<string>First Release</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright, Shotaro Nakano, 2024</string>
+	<string>Copyright, Shotaro Nakano, 2025</string>
 	<key>NSPrincipalClass</key>
 	<string>GlyphsGPT</string>
 	<key>PyMainFileNames</key>

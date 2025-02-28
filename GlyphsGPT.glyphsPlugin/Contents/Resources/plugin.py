@@ -4,21 +4,31 @@ from __future__ import division, print_function, unicode_literals
 import objc
 from GlyphsApp import *
 from GlyphsApp.plugins import *
-from AppKit import NSApp, NSMenuItem, NSButton, NSImageOnly, NSWindowCollectionBehaviorCanJoinAllSpaces, NSFloatingWindowLevel
+from AppKit import (
+    NSApp, NSMenuItem, NSImageOnly,
+    NSWindowCollectionBehaviorCanJoinAllSpaces, NSFloatingWindowLevel
+)
 import openai
 import sys
 sys.path.insert(0, "PATH to your Glyphs Python like the following /Users/yourMac/Library/Application Support/Glyphs 3/Repositories/GlyphsPythonPlugin/Python.framework/Versions/3.10/lib/python3.10/site-packages/")
 
 import anthropic
+import re
+import os
 
 class GlyphsGPT(GeneralPlugin):
 
-    # Definitions of IBOutlets
+    # IBOutlets
     dialog = objc.IBOutlet()
     runButton = objc.IBOutlet()
     settingsButton = objc.IBOutlet()
     settingsPanel = objc.IBOutlet()
     modelSelector = objc.IBOutlet()
+
+    autopilotButton = objc.IBOutlet()
+
+    # The checkbox for toggling the pre-defined prompt
+    predefinedPromptButton = objc.IBOutlet()
 
     @objc.python_method
     def settings(self):
@@ -30,7 +40,7 @@ class GlyphsGPT(GeneralPlugin):
         self.setupOpenAIClient()
         self.loadPreferences()
         self.setupWindowBehavior()
-        self.dialog.setDelegate_(self)  # Set the main dialog as its own delegate
+        self.dialog.setDelegate_(self)
 
     @objc.python_method
     def setupClaudeClient(self):
@@ -63,13 +73,26 @@ class GlyphsGPT(GeneralPlugin):
 
     @objc.python_method
     def loadPreferences(self):
+        # Restore the selected model
         selectedModel = Glyphs.defaults['com.yourdomain.GlyphsGPT.selectedModel']
         if selectedModel is not None:
             self.modelSelector.setSelectedSegment_(selectedModel)
 
+        # Restore autopilot
+        autopilotEnabled = Glyphs.defaults['com.yourdomain.GlyphsGPT.autopilotEnabled']
+        if autopilotEnabled is not None:
+            self.autopilotButton.setState_(1 if autopilotEnabled else 0)
+            self.runButton.setTitle_("AUTO" if autopilotEnabled else "Run")
+
+        # Restore the pre-defined prompt checkbox
+        predefinedPromptEnabled = Glyphs.defaults['com.yourdomain.GlyphsGPT.predefinedPromptEnabled']
+        if predefinedPromptEnabled is not None:
+            self.predefinedPromptButton.setState_(1 if predefinedPromptEnabled else 0)
+
     @objc.python_method
     def savePreferences(self):
         Glyphs.defaults['com.yourdomain.GlyphsGPT.selectedModel'] = self.modelSelector.selectedSegment()
+        # autopilot and pre-defined prompt states are saved in their toggle actions
 
     @objc.IBAction
     def toggleSettings_(self, sender):
@@ -82,21 +105,36 @@ class GlyphsGPT(GeneralPlugin):
     def runAI_(self, sender):
         print("runAI_ method called")
         macro_text = self.getContentFromMacro_(None)
-        
         if not macro_text:
             print("No text was retrieved from the Macro Panel")
             return
-        
+
         print("Text retrieved from Macro:", macro_text)
-        
+
+        # Decide which model to call
         if self.modelSelector.selectedSegment() == 0:
             response = self.chat_with_gpt(macro_text)
         else:
             response = self.chat_with_claude(macro_text)
-        
+
         self.sendResponseToMacro_(response)
         print("Response set to Macro Panel")
         self.savePreferences()
+
+        # === Autopilot logic ===
+        autopilot_enabled = bool(self.autopilotButton.state())
+        if autopilot_enabled:
+            print("Autopilot is enabled. Attempting to extract and execute Python code.")
+            code_to_run = self.extract_python_code(response)
+            if code_to_run:
+                print("Code block found:\n", code_to_run)
+                try:
+                    exec(code_to_run, globals(), locals())
+                    print("Autopilot code executed successfully.")
+                except Exception as e:
+                    print("Error executing autopilot code:", e)
+            else:
+                print("No Python code block found in the response.")
 
     @objc.IBAction
     def getContentFromMacro_(self, sender):
@@ -127,14 +165,25 @@ class GlyphsGPT(GeneralPlugin):
 
     @objc.python_method
     def chat_with_gpt(self, prompt):
-        customInstruction = ""
+        """
+        If 'predefinedPromptEnabled' is True, send the specialized content.
+        Otherwise, send an empty string.
+        """
+        predefinedPromptEnabled = Glyphs.defaults['com.yourdomain.GlyphsGPT.predefinedPromptEnabled']
+        if predefinedPromptEnabled:
+            systemContent = "You are a helpful assistant specialized in Glyphs 3 App and Python3 coding."
+        else:
+            systemContent = ""
+
+        messages = [
+            {"role": "system", "content": systemContent},
+            {"role": "user", "content": prompt}
+        ]
+
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant specialized in Glyphs 3 App and Python3 coding."},
-                    {"role": "user", "content": customInstruction + prompt}
-                ]
+                messages=messages
             )
             return response['choices'][0]['message']['content']
         except Exception as e:
@@ -142,20 +191,29 @@ class GlyphsGPT(GeneralPlugin):
 
     @objc.python_method
     def chat_with_claude(self, prompt):
-        customInstruction = ""
+        """
+        If 'predefinedPromptEnabled' is True, send the specialized content.
+        Otherwise, send an empty string.
+        """
+        predefinedPromptEnabled = Glyphs.defaults['com.yourdomain.GlyphsGPT.predefinedPromptEnabled']
+        if predefinedPromptEnabled:
+            system_text = "You are a helpful assistant specialized in Glyphs 3 App and Python3 coding."
+        else:
+            system_text = ""
+
         try:
             message = self.claude_client.messages.create(
-                model="claude-3-5-sonnet-20240620",
+                model="claude-3-7-sonnet-20250219",
                 max_tokens=1000,
                 temperature=0,
-                system="You are a helpful assistant specialized in Glyphs 3 App and Python3 coding.",
+                system=system_text,
                 messages=[
                     {
                         "role": "user",
                         "content": [
                             {
                                 "type": "text",
-                                "text": customInstruction + prompt
+                                "text": prompt
                             }
                         ]
                     }
@@ -165,22 +223,48 @@ class GlyphsGPT(GeneralPlugin):
         except Exception as e:
             return f"An error occurred with Claude: {str(e)}"
 
-    # This method is called when the main dialog window is about to close
+    @objc.IBAction
+    def toggleAutopilot_(self, sender):
+        autopilot_state = bool(sender.state())
+        Glyphs.defaults['com.yourdomain.GlyphsGPT.autopilotEnabled'] = autopilot_state
+        self.runButton.setTitle_("AUTO" if autopilot_state else "Run")
+        print("Autopilot mode set to:", autopilot_state)
+
+    @objc.IBAction
+    def togglePredefinedPrompt_(self, sender):
+        """
+        If ON => system prompt is "You are a helpful assistant specialized…"
+        If OFF => system prompt is ""
+        """
+        predefPromptState = bool(sender.state())
+        Glyphs.defaults['com.yourdomain.GlyphsGPT.predefinedPromptEnabled'] = predefPromptState
+        print("Predefined prompt enabled:", predefPromptState)
+
+    @objc.python_method
+    def extract_python_code(self, text):
+        """
+        Look for a Python code block enclosed in triple backticks.
+        Returns the first code block found, or None if none is found.
+        """
+        pattern = r"```python(.*?)```"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        return None
+
     def windowWillClose_(self, notification):
         if self.settingsPanel.isVisible():
             self.settingsPanel.orderOut_(None)
 
-    # Define the method to get the Claude API key
     @objc.python_method
     def getClaudeAPIKey(self):
-        # You can directly return the API key here for testing purposes
-        # For example: return "your-claude-api-key"
-        return "your-claude-api-key"
+        # Return your actual Claude key
+        return ""
 
     @objc.python_method
     def getGPTAPIKey(self):
-        # TODO: Implement a secure method to retrieve the GPT API key
-        return "your-ChatGPT-api-key"
+        # Return your actual GPT key
+        return ""
 
     @objc.python_method
     def __file__(self):

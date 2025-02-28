@@ -7,8 +7,10 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GlyphsGPT">
             <connections>
+                <outlet property="autopilotButton" destination="Tvi-hu-ckf" id="WOf-pE-mjL"/>
                 <outlet property="dialog" destination="b1h-8F-7u1" id="bwJ-lA-Iq4"/>
                 <outlet property="modelSelector" destination="rHL-qa-qMX" id="YJ2-tp-0m3"/>
+                <outlet property="predefinedPromptButton" destination="e3h-jX-p83" id="XLr-SK-YqM"/>
                 <outlet property="runButton" destination="o7q-ke-Hdr" id="WJl-g0-Saq"/>
                 <outlet property="settingsButton" destination="pyq-vv-fzv" id="aAm-5b-XYH"/>
                 <outlet property="settingsPanel" destination="Oq6-eE-Us9" id="rFH-rS-phK"/>
@@ -54,14 +56,16 @@
         <window title="Setting" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" frameAutosaveName="" animationBehavior="default" id="Oq6-eE-Us9" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="139" y="81" width="229" height="56"/>
+            <rect key="contentRect" x="139" y="81" width="229" height="139"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
+            <value key="minSize" type="size" width="229" height="139"/>
+            <value key="maxSize" type="size" width="229" height="139"/>
             <view key="contentView" id="ks4-mM-Y8e">
-                <rect key="frame" x="0.0" y="0.0" width="229" height="56"/>
+                <rect key="frame" x="0.0" y="0.0" width="229" height="139"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rHL-qa-qMX">
-                        <rect key="frame" x="78" y="19" width="73" height="24"/>
+                        <rect key="frame" x="78" y="102" width="73" height="24"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <segmentedCell key="cell" borderStyle="border" alignment="left" style="rounded" trackingMode="selectOne" id="IJB-Zb-SKl">
                             <font key="font" metaFont="system"/>
@@ -72,7 +76,7 @@
                         </segmentedCell>
                     </segmentedControl>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yJv-65-1OS">
-                        <rect key="frame" x="13" y="24" width="59" height="16"/>
+                        <rect key="frame" x="13" y="107" width="59" height="16"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" lineBreakMode="clipping" title="ChatGPT" id="Qhn-mV-r7h">
                             <font key="font" metaFont="system"/>
@@ -81,7 +85,7 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0UG-yp-u2Y">
-                        <rect key="frame" x="155" y="26" width="47" height="16"/>
+                        <rect key="frame" x="155" y="109" width="47" height="16"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" lineBreakMode="clipping" title="Claude" id="Aqe-f2-IXr">
                             <font key="font" metaFont="system"/>
@@ -89,9 +93,41 @@
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <switch horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" baseWritingDirection="leftToRight" alignment="left" translatesAutoresizingMaskIntoConstraints="NO" id="Tvi-hu-ckf">
+                        <rect key="frame" x="13" y="18" width="42" height="25"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <connections>
+                            <action selector="toggleAutopilot:" target="-2" id="bho-3R-3bt"/>
+                        </connections>
+                    </switch>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tIy-0u-BKt">
+                        <rect key="frame" x="78" y="23" width="133" height="16"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" lineBreakMode="clipping" title="Autopilot" id="2DK-e2-n8Z">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <switch horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" baseWritingDirection="leftToRight" alignment="left" state="on" translatesAutoresizingMaskIntoConstraints="NO" id="e3h-jX-p83">
+                        <rect key="frame" x="13" y="62" width="42" height="25"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <connections>
+                            <action selector="togglePredefinedPrompt:" target="-2" id="qqB-0j-CtC"/>
+                        </connections>
+                    </switch>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mGQ-d9-dav">
+                        <rect key="frame" x="78" y="67" width="133" height="16"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" lineBreakMode="clipping" title="Pre defined prompt" id="sZN-g9-NLH">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-534" y="128"/>
+            <point key="canvasLocation" x="-534.5" y="169.5"/>
         </window>
     </objects>
     <resources>
