@@ -9,13 +9,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.Shotaro Nakano.GlyphsGPT</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>2.0</string>
+	<string>3.0</string>
 	<key>CFBundleName</key>
 	<string>GlyphsGPT</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0</string>
+	<string>3.0</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>3</string>
 	<key>UpdateFeedURL</key>
 	<string>____OnlineUrlToThisPlist____</string>
 	<key>productPageURL</key>
