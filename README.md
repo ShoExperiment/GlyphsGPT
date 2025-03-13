@@ -22,7 +22,7 @@ It scans the AI’s response for code blocks (e.g., enclosed in triple backticks
 
 ## Requirements
 
-- **Glyphs App**: Version 3.1 or 3.2 (3.3 and 3.4 have a slight issue.)
+- **Glyphs App**: Version 3.1 or later
 - **Python Version**: The plugin has been tested with Python 3.10.12 installed via Homebrew. It will not work with Glyphs Python runtime.
 - **API keys**: ChatGPT and/or Claude
 - **Required Libraries**:
@@ -56,6 +56,19 @@ print("✅ Jiter is installed correctly!", jiter.__version__)
 ### 2. Set the API Keys
 
 The API keys for Claude AI and ChatGPT need to be hard-coded within the plugin. You should edit the plugin code directly to securely store the keys.
+
+```
+    #
+    # Provide your API keys
+    #
+    @objc.python_method
+    def getClaudeAPIKey(self):
+        return ""  # truncated
+
+    @objc.python_method
+    def getGPTAPIKey(self):
+        return ""  # truncated
+```
 
 ### 3. Change some configurations (optional)
 
@@ -114,7 +127,7 @@ systemContent = (
 
 ### 5. Notes
 
-Glyphs 3.3 or Glyphs 3.4 The plugin can not run from the Glyphs menu. If you close the plugin window, you need to restart your Glyphs to see again. (Maybe this is a bug of Glyphs)
+
 
 
 ## License
