@@ -8,11 +8,11 @@ from AppKit import (
     NSApp, NSMenuItem, NSImageOnly,
     NSWindowCollectionBehaviorCanJoinAllSpaces, NSFloatingWindowLevel
 )
+import sys
 
 #If some of your libraries are installed in your Python runtime of Glyphs app activate below the code and specify the location:
 #sys.path.insert(0, "/Users/(username)/Library/Application Support/Glyphs 3/Repositories/GlyphsPythonPlugin/Python.framework/Versions/3.10/lib/python3.10/site-packages/")
 
-import sys
 import openai
 import anthropic
 import re
@@ -28,17 +28,25 @@ class GlyphsGPT(GeneralPlugin):
     modelSelector = objc.IBOutlet()
     autopilotButton = objc.IBOutlet()
     predefinedPromptButton = objc.IBOutlet()
-    conversationHistoryButton = objc.IBOutlet()  # NEW OUTLET for the conversation history toggle
+    conversationHistoryButton = objc.IBOutlet()  # toggle for conversation history
 
     # Text field controlling max tokens
     maxTokensField = objc.IBOutlet()
 
     @objc.python_method
     def settings(self):
+        """
+        Called once when the plugin is loaded.
+        We load the nib here, but we do NOT rely on “Visible at Launch”.
+        Make sure to uncheck “Visible at Launch” for the window in IB.
+        """
         self.name = Glyphs.localize({'en': 'GlyphsGPT'})
-        self.loadNib('IBdialog', __file__)
+        self.loadNib('IBdialog', __file__)  # This just loads the nib; it won't show the window.
+        
         self.setupSettingsButton()
-        self.settingsPanel.orderOut_(None)
+        # Hide the settings panel at launch (optional):
+        if self.settingsPanel:
+            self.settingsPanel.orderOut_(None)
 
         self.setupClaudeClient()
         self.setupOpenAIClient()
@@ -49,8 +57,9 @@ class GlyphsGPT(GeneralPlugin):
         self.conversation_gpt = []
         self.conversation_claude = []
 
-        # Optional: set a delegate to handle window events
-        self.dialog.setDelegate_(self)
+        # Set the dialog delegate so we can intercept close events if we want
+        if self.dialog:
+            self.dialog.setDelegate_(self)
 
     @objc.python_method
     def setupClaudeClient(self):
@@ -70,12 +79,40 @@ class GlyphsGPT(GeneralPlugin):
 
     @objc.python_method
     def start(self):
-        # Add your plugin to the Window menu
-        newMenuItem = NSMenuItem(self.name, self.showWindow_)
+        """
+        Called after settings(). Add the plugin to the Window menu
+        so the user can open the dialog on demand.
+        """
+        if Glyphs.buildNumber >= 3320:
+            from GlyphsApp.UI import MenuItem
+            newMenuItem = MenuItem(self.name, action=self.showWindow_, target=self)
+        else:
+            newMenuItem = NSMenuItem.new()
+            newMenuItem.setTitle_(self.name)
+            newMenuItem.setAction_(self.showWindow_)
+            newMenuItem.setTarget_(self)
         Glyphs.menu[WINDOW_MENU].append(newMenuItem)
 
     def showWindow_(self, sender):
-        self.dialog.makeKeyAndOrderFront_(None)
+        """
+        Called when the user selects the plugin from the Window menu.
+        If the window is not “Visible at Launch,” we explicitly show it here.
+        
+        If you want to reload the nib each time (in case it's been closed/released),
+        you could do something like:
+        
+            if not self.dialog or not self.dialog.isVisible():
+                self.loadNib('IBdialog', __file__)
+                self.setupWindowBehavior()
+                self.dialog.setDelegate_(self)
+        
+        For now, we assume "Release When Closed" is unchecked in IB,
+        so we can simply show the existing window object.
+        """
+        if self.dialog:
+            self.dialog.makeKeyAndOrderFront_(None)
+        else:
+            print("Error: dialog is None, nib may not have loaded properly.")
 
     @objc.python_method
     def setupSettingsButton(self):
@@ -87,8 +124,14 @@ class GlyphsGPT(GeneralPlugin):
 
     @objc.python_method
     def setupWindowBehavior(self):
-        self.dialog.setCollectionBehavior_(NSWindowCollectionBehaviorCanJoinAllSpaces)
-        self.dialog.setLevel_(NSFloatingWindowLevel)
+        """
+        Make the plugin window float above other windows, etc.
+        """
+        if self.dialog:
+            self.dialog.setCollectionBehavior_(NSWindowCollectionBehaviorCanJoinAllSpaces)
+            self.dialog.setLevel_(NSFloatingWindowLevel)
+        else:
+            print("setupWindowBehavior: dialog is None")
 
     @objc.python_method
     def loadPreferences(self):
@@ -122,7 +165,7 @@ class GlyphsGPT(GeneralPlugin):
         if self.modelSelector:
             Glyphs.defaults['com.yourdomain.GlyphsGPT.selectedModel'] = self.modelSelector.selectedSegment()
     
-        # Also save max tokens when saving preferences
+        # Also save max tokens
         if self.maxTokensField:
             try:
                 max_tokens = int(self.maxTokensField.stringValue())
@@ -139,19 +182,18 @@ class GlyphsGPT(GeneralPlugin):
     #
     @objc.IBAction
     def toggleSettings_(self, sender):
-        if self.settingsPanel.isVisible():
+        if self.settingsPanel and self.settingsPanel.isVisible():
             self.settingsPanel.orderOut_(None)
-        else:
+        elif self.settingsPanel:
             self.settingsPanel.orderFront_(None)
 
     @objc.IBAction
     def runAI_(self, sender):
         print("runAI_ method called")
-    
         # Save preferences FIRST before processing the request
         self.savePreferences()
         print("Preferences saved before processing request")
-    
+
         macro_text = self.getContentFromMacro_(None)
         if not macro_text:
             print("No text was retrieved from the Macro Panel")
@@ -167,7 +209,6 @@ class GlyphsGPT(GeneralPlugin):
 
         self.sendResponseToMacro_(response)
         print("Response set to Macro Panel")
-        
         
         self.savePreferences()
 
@@ -236,15 +277,13 @@ class GlyphsGPT(GeneralPlugin):
                 tokens = 1
             # Save the value immediately
             Glyphs.defaults['com.yourdomain.GlyphsGPT.maxTokens'] = tokens
-            # Force synchronize defaults to ensure they're saved
             NSUserDefaults.standardUserDefaults().synchronize()
             print(f"Max tokens immediately set to: {tokens}")
         except ValueError:
             print("Invalid input for max tokens. Please enter a positive integer.")
 
-
     #
-    # NEW: Toggle Conversation History
+    # Toggle Conversation History
     #
     @objc.IBAction
     def toggleConversationHistory_(self, sender):
@@ -259,15 +298,10 @@ class GlyphsGPT(GeneralPlugin):
         print("Conversation history set to:", conversationHistoryState)
 
     #
-    # Chat with GPT (NEW client-based approach) + conversation history
+    # Chat with GPT + conversation history
     #
     @objc.python_method
     def chat_with_gpt(self, prompt):
-        """
-        Uses the new client-based interface from openai>=1.0 (Nov 6, 2023).
-        Example:
-            self.openai_client.chat.completions.create(...)
-        """
         predefinedPromptEnabled = Glyphs.defaults.get('com.yourdomain.GlyphsGPT.predefinedPromptEnabled', False)
         systemContent = (
             "You are a helpful assistant specialized in Type Design, Glyphs 3 App and Python3 coding. You fully understand the differences between Glyphs 2 API and Glyphs 3 API"
@@ -308,11 +342,9 @@ class GlyphsGPT(GeneralPlugin):
 
         # Store conversation if enabled
         if conversationHistoryEnabled:
-            # Append user prompt + assistant response to conversation
             self.conversation_gpt.append({"role": "user", "content": prompt})
             self.conversation_gpt.append({"role": "assistant", "content": response})
-            
-            # Limit to last N messages (e.g. 10 entries total)
+            # Limit conversation to last 6 entries
             self.conversation_gpt = self.conversation_gpt[-6:]
 
         return response
@@ -330,46 +362,32 @@ class GlyphsGPT(GeneralPlugin):
         )
 
         conversationHistoryEnabled = Glyphs.defaults.get('com.yourdomain.GlyphsGPT.conversationHistoryEnabled', False)
-         # Get max tokens with explicit int conversion and debug print
         max_tokens = int(Glyphs.defaults.get('com.yourdomain.GlyphsGPT.maxTokens', 1000))
         print(f"Using max_tokens for Claude API call: {max_tokens}")
 
         # Build messages for Claude
-        # Claude's .messages.create expects a list of messages in a slightly different format.
-        # We'll convert from our internal "role"/"content" structure into Anthropic's format.
         if conversationHistoryEnabled:
             claude_messages = []
-            # Convert existing conversation
             for msg in self.conversation_claude:
                 if msg["role"] == "user":
                     claude_messages.append({
                         "role": "user",
-                        "content": [
-                            {"type": "text", "text": msg["content"]}
-                        ]
+                        "content": [{"type": "text", "text": msg["content"]}]
                     })
                 elif msg["role"] == "assistant":
                     claude_messages.append({
                         "role": "assistant",
-                        "content": [
-                            {"type": "text", "text": msg["content"]}
-                        ]
+                        "content": [{"type": "text", "text": msg["content"]}]
                     })
-
-            # Finally add the new user prompt
+            # Add the new user prompt
             claude_messages.append({
                 "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt}
-                ]
+                "content": [{"type": "text", "text": prompt}]
             })
         else:
-            # Single-turn conversation: only add the user message.
             claude_messages = [{
                 "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt}
-                ]
+                "content": [{"type": "text", "text": prompt}]
             }]
 
         try:
@@ -404,10 +422,26 @@ class GlyphsGPT(GeneralPlugin):
         return None
 
     #
+    # Optional: intercept close to hide instead of destroying
+    #
+    # def windowShouldClose_(self, sender):
+    #     """
+    #     If you want the window to be hidden rather than truly closed,
+    #     uncomment this. Then the user can re-open it from the menu.
+    #     Make sure 'Release When Closed' is unchecked in IB or do this override.
+    #     """
+    #     self.dialog.orderOut_(None)
+    #     return False
+
+    #
     # Window close event
     #
     def windowWillClose_(self, notification):
-        if self.settingsPanel.isVisible():
+        """
+        Called when the window is actually closing.
+        If you want to do cleanup, do it here.
+        """
+        if self.settingsPanel and self.settingsPanel.isVisible():
             self.settingsPanel.orderOut_(None)
 
     #
@@ -415,11 +449,11 @@ class GlyphsGPT(GeneralPlugin):
     #
     @objc.python_method
     def getClaudeAPIKey(self):
-        return ""
+        return ""  # truncated
 
     @objc.python_method
     def getGPTAPIKey(self):
-        return ""
+        return ""  # truncated
 
     @objc.python_method
     def __file__(self):
