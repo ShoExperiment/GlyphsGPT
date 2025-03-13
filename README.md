@@ -1,18 +1,18 @@
-
 # GlyphsGPT
-<img width="856" alt="image" src="https://github.com/user-attachments/assets/7e61ceb9-9220-4c0b-8fa6-6afabb82a5a2" />
+<img width="975" alt="image" src="https://github.com/user-attachments/assets/0bfdd992-8f53-49b7-9df8-6d530b0954d5" />
 
 
 
 
-GlyphsGPT is a plugin for the Glyphs App that integrates OpenAI's GPT and Anthropic's Claude AI to assist with Python scripting within the app. This tool allows users to leverage powerful language models to generate code snippets, automate tasks, and enhance their workflow in Glyphs.
+
+GlyphsGPT is a plugin for the Glyphs App that integrates OpenAI's ChatGPT and Anthropic's Claude AI to assist with Python scripting within the app. This tool allows users to leverage powerful language models to generate code snippets, automate tasks, and enhance their workflow in Glyphs.
 
 ## Features
-- **Turn on/off Pre-defined prompt** to ask non-Glyphs-related tasks.
+- **Instruction** to ask non-Glyphs-related tasks.
 - **Autopilot** to excute code directly.
-- **Generate Python scripts** within the Glyphs App using AI-powered assistants.
+- **Conversation History** to excute code directly.
+- **Max Tokens** to controll token amount.
 - **Supports both OpenAI's GPT** and **Anthropic's Claude AI**.
-- **Customizable and extendable** to fit various workflows within the Glyphs environment.
 
 **Autopilot**
 
@@ -22,12 +22,12 @@ It scans the AI’s response for code blocks (e.g., enclosed in triple backticks
 
 ## Requirements
 
-- **Glyphs App**: Version 3.0 or later.
-- **Python Version**: The plugin has been tested with Python 3.10.12 installed via Homebrew.
+- **Glyphs App**: Version 3.1 or 3.2 (3.3 and 3.4 have a slight issue.)
+- **Python Version**: The plugin has been tested with Python 3.10.12 installed via Homebrew. It will not work with Glyphs Python runtime.
 - **API keys**: ChatGPT and/or Claude
 - **Required Libraries**:
-  - `openai`
-  - `anthropic`
+  - `openai 1.6`
+  - `anthropic 0.49`
 
 ## Installation
 
@@ -39,39 +39,68 @@ You must install Python via Homebrew. After installation, you need to configure 
 
 <img width="735" alt="image" src="https://github.com/user-attachments/assets/bc8bdf21-452d-4b6a-b972-dc65cdde3130">
 
-
-You will also need to know the path to the Python installation. This path will be used to install the required libraries and must be hard-coded into this plugin.
-
-The path should look something like this:
-
-```
-/Users/your-computer-name/Library/Application Support/Glyphs 3/Repositories/GlyphsPythonPlugin/Python.framework/Versions/3.10/lib/python3.10/site-packages/
-```
-
 ### 1. Install the Required Libraries
 
-To ensure that Glyphs can access the required Python libraries, use the following commands:
+Install required libraries to the Python.
+Run below the code on your Macro editor to make sure.
 
-```sh
-pip install --target="your-glyphs-python-plugin-path/site-packages/" openai
-
-pip install --target="your-glyphs-python-plugin-path/site-packages/" anthropic
+```
+import openai
+import anthropic
+import jiter
+print("✅ OpenAI Version:", openai.__version__)
+print("✅ OpenAI Version:", anthropic.__version__)
+print("✅ Jiter is installed correctly!", jiter.__version__)
 ```
 
-**Note**: Replace `your-glyphs-python-plugin-path` with the actual path where your Glyphs Python environment is located.
-
-### 2. Path Configuration
-
-You need to configure the path within the plugin to ensure it can access the installed libraries:
-
-```python
-sys.path.insert(0, "your-glyphs-python-plugin-path/site-packages/")
-```
-
-### 3. Set the API Keys
+### 2. Set the API Keys
 
 The API keys for Claude AI and ChatGPT need to be hard-coded within the plugin. You should edit the plugin code directly to securely store the keys.
 
+### 3. Change some configurations (optional)
+
+To change the model.
+```
+chat_completion = self.openai_client.chat.completions.create(
+                model="gpt-4o",  # or "gpt-4", "gpt-4o", etc.
+                messages=messages,
+                max_tokens=max_tokens
+            )
+```
+```
+message = self.claude_client.messages.create(
+                model="claude-3-7-sonnet-20250219",
+                max_tokens=max_tokens,
+                temperature=0,
+                system=system_text,
+                messages=claude_messages
+            )
+```
+
+
+To increase conversation history, change the followings.
+```
+self.conversation_gpt = self.conversation_gpt[-6:]
+```
+
+```
+self.conversation_claude = self.conversation_claude[-6:]
+```
+You can also change instruction as well.
+```
+system_text = (
+            "You are a helpful assistant specialized in Type Design, Glyphs 3 App and Python3 coding. You fully understand the differences between Glyphs 2 API and Glyphs 3 API"
+            if predefinedPromptEnabled else
+            ""
+        )
+```
+```
+systemContent = (
+            "You are a helpful assistant specialized in Type Design, Glyphs 3 App and Python3 coding. You fully understand the differences between Glyphs 2 API and Glyphs 3 API"
+            if predefinedPromptEnabled else
+            ""
+        )
+```
 ### 4. Usage
 
 - **Write Your Request**: In the Macro panel editor, write your request for what you need assistance with.
@@ -85,13 +114,8 @@ The API keys for Claude AI and ChatGPT need to be hard-coded within the plugin. 
 
 ### 5. Notes
 
-- **AI Models**: The AI models used (ChatGPT 3.5 and Claude 3.7) are hard-coded in the plugin. If you want to use a different model, you will need to modify the plugin code. For example:
+Glyphs 3.3 or Glyphs 3.4 The plugin can not run from the Glyphs menu. If you close the plugin window, you need to restart your Glyphs to see again. (Maybe this is a bug of Glyphs)
 
-```python
-model="claude-3-5-sonnet-20240620"
-```
-
-- **API Usage**: This plugin uses API calls to communicate with the AI models. Make sure you have the appropriate API keys. Note that each conversation with the AI is treated as a new session; the AI does not remember previous interactions.
 
 ## License
 
